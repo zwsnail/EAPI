@@ -1,8 +1,10 @@
 <?php
 namespace App;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use App\Model\Product;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
 class User extends Authenticatable
 {
     //这个地方是运行了passport后要加的字段，HasApiTokens
@@ -23,4 +25,10 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    //这个是我改造的地方
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
 }

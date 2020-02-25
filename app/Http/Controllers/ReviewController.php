@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Model\Review;
+use App\Model\Product;
+use Illuminate\Http\Request;
 use App\Http\Requests\ReviewRequest;
 use App\Http\Resources\ReviewResource;
-use App\Model\Product;
-use App\Model\Review;
-use Illuminate\Http\Request;
+use App\Http\Resources\ReviewResourceShow;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReviewController extends Controller
@@ -43,11 +44,19 @@ class ReviewController extends Controller
      */
     public function store(ReviewRequest $request,Product $product)
     {
+        //只要store就要定规则，定规则就去新建resource，resource里面有rulls
+        //php artisan make:resource ReviewResource
+
+        //可以先return那两个参数出来看看
         $review = new Review($request->all());
+        //因为是关联数组，所以必须把参数加上product，已经有hasMany,所以可以->reviews()
         $product->reviews()->save($review);
         return response([
             'data' => new ReviewResource($review)
         ],Response::HTTP_CREATED);
+
+
+
     }
 
     /**
@@ -56,9 +65,20 @@ class ReviewController extends Controller
      * @param  \App\Model\Review  $review
      * @return \Illuminate\Http\Response
      */
-    public function show(Review $review)
+    public function show(Product $product, Review $review)
     {
-        //
+        //我添加的这里，视频里没加这部
+ 
+        // return $product->id;
+        // return $review;
+        // return new ReviewResource($product->reviews);
+        $review_id = $review->id;
+        $o = Review::find($review_id);
+        return new ReviewResourceShow($o);
+        //我靠试了我多久啊，两三个小时过了都不知道resource里面的参数到底是什么！？
+        //其实就是一个将被转化成数组的集合！！！所以只要给集合就OK！！！
+        return new ReviewResourceShow(Review::find($product->id));
+        return new ReviewResourceShow($product->reviews);//date[]
     }
 
     /**

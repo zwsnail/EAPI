@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ProductNotBelongsToUser;
-use App\Http\Requests\ProductRequest;
-use App\Http\Resources\Product\ProductCollection;
-use App\Http\Resources\Product\ProductResource;
+use App\User;
 use App\Model\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\ProductRequest;
+use App\Exceptions\ProductNotBelongsToUser;
 use Symfony\Component\HttpFoundation\Response;
+use App\Http\Resources\Product\ProductResource;
+use App\Http\Resources\Product\ProductCollection;
 
 class ProductController extends Controller
 {
@@ -50,7 +51,6 @@ class ProductController extends Controller
      */
     public function store(ProductRequest $request)//这个类名本来是$Request要相应的修改
     {
-
         //可以用create方法吗？感觉应该可以只要改fill那儿，还没试
         $product = new Product;
         $product->name = $request->name;
@@ -58,6 +58,8 @@ class ProductController extends Controller
         $product->stock = $request->stock;
         $product->price = $request->price;
         $product->discount = $request->discount;
+        //我感觉没有把user_id加进来，所以新建的product没有user_id，为0，所以改造下：
+        $product->user_id = Auth::id();
         $product->save();
         return response([
             //用之前改造的类来接收,use Symfony\Component\HttpFoundation\Response; 这个下面有所有404代码，HTTP_CREATED
@@ -133,5 +135,6 @@ class ProductController extends Controller
         if (Auth::id() !== $product->user_id) {
             throw new ProductNotBelongsToUser;
         }
+        //这里是用的 php artisan make:exception ProductNotBelongsToUser 创建的
     }
 }
